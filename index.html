@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ORME CRUD V2</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f2f4f7;
+    padding: 20px;
+}
+
+.container {
+    max-width: 600px;
+    margin: auto;
+}
+
+h1 {
+    text-align: center;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.08);
+}
+
+input {
+    width: 100%;
+    padding: 13px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+button {
+    border: none;
+    padding: 11px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 3px;
+    font-weight: bold;
+}
+
+.add {
+    width: 100%;
+    background: #198754;
+    color: white;
+}
+
+.edit {
+    background: #ffc107;
+}
+
+.delete {
+    background: #dc3545;
+    color: white;
+}
+
+.cancel {
+    background: #6c757d;
+    color: white;
+}
+
+.item {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 10px;
+}
+
+.item-id {
+    font-weight: bold;
+    color: #555;
+}
+
+.item-name {
+    font-size: 19px;
+    font-weight: bold;
+    margin: 7px 0;
+}
+
+.item-info {
+    margin: 5px 0;
+}
+
+.price {
+    color: #198754;
+    font-weight: bold;
+}
+
+.stock {
+    color: #555;
+}
+
+#message {
+    text-align: center;
+    margin: 10px 0;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>ORME Orders V2</h1>
+
+    <!-- =========================
+         ADD / EDIT FORM
+    ========================== -->
+
+    <div class="card">
+
+        <input
+            type="text"
+            id="name"
+            placeholder="Enter item name"
+        >
+
+        <input
+            type="number"
+            id="price"
+            placeholder="Enter price"
+            step="0.01"
+            min="0"
+        >
+
+        <input
+            type="number"
+            id="stock"
+            placeholder="Enter stock"
+            min="0"
+        >
+
+        <button
+            class="add"
+            id="saveBtn"
+            onclick="saveItem()"
+        >
+            Add Item
+        </button>
+
+        <button
+            class="cancel"
+            id="cancelBtn"
+            onclick="cancelEdit()"
+            style="display:none;"
+        >
+            Cancel Edit
+        </button>
+
+        <div id="message"></div>
+
+    </div>
+
+
+    <!-- =========================
+         SEARCH / LIST
+    ========================== -->
+
+    <div class="card">
+
+        <input
+            type="text"
+            id="search"
+            placeholder="Search item..."
+            oninput="loadItems()"
+        >
+
+        <div id="list">
+            Loading...
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+// ========================================
+// SUPABASE CONNECTION
+// ========================================
+
+const SUPABASE_URL =
+    "https://adojdhrfrquueyxtzbiu.supabase.co";
+
+const SUPABASE_KEY =
+    "sb_publishable_DTVJI_ernJZP5BBDTKMY0A_rCbHAWzG";
+
+const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+
+// ========================================
+// VARIABLES
+// ========================================
+
+let editId = null;
+
+
+// ========================================
+// MESSAGE
+// ========================================
+
+function showMessage(text, success = true) {
+
+    const message =
+        document.getElementById("message");
+
+    message.textContent = text;
+
+    message.style.color =
+        success ? "green" : "red";
+
+    setTimeout(() => {
+        message.textContent = "";
+    }, 2500);
+}
+
+
+// ========================================
+// ADD / UPDATE
+// ========================================
+
+async function saveItem() {
+
+    const nameInput =
+        document.getElementById("name");
+
+    const priceInput =
+        document.getElementById("price");
+
+    const stockInput =
+        document.getElementById("stock");
+
+
+    const name =
+        nameInput.value.trim();
+
+    const price =
+        Number(priceInput.value);
+
+    const stock =
+        Number(stockInput.value);
+
+
+    // ================================
+    // VALIDATION
+    // ================================
+
+    if (!name) {
+
+        showMessage(
+            "Enter item name.",
+            false
+        );
+
+        return;
+    }
+
+
+    if (
+        priceInput.value === "" ||
+        price < 0
+    ) {
+
+        showMessage(
+            "Enter a valid price.",
+            false
+        );
+
+        return;
+    }
+
+
+    if (
+        stockInput.value === "" ||
+        stock < 0
+    ) {
+
+        showMessage(
+            "Enter a valid stock.",
+            false
+        );
+
+        return;
+    }
+
+
+    // ================================
+    // UPDATE
+    // ================================
+
+    if (editId) {
+
+        const { error } = await db
+            .from("orders")
+            .update({
+                name: name,
+                price: price,
+                stock: stock
+            })
+            .eq("id", editId);
+
+
+        if (error) {
+
+            showMessage(
+                "Update failed: " +
+                error.message,
+                false
+            );
+
+            return;
+        }
+
+
+        showMessage(
+            "Item updated!"
+        );
+
+        cancelEdit();
+
+        loadItems();
+
+        return;
+    }
+
+
+    // ================================
+    // INSERT
+    // ================================
+
+    const { error } = await db
+        .from("orders")
+        .insert({
+            name: name,
+            price: price,
+            stock: stock
+        });
+
+
+    if (error) {
+
+        showMessage(
+            "Save failed: " +
+            error.message,
+            false
+        );
+
+        return;
+    }
+
+
+    // Clear inputs
+
+    nameInput.value = "";
+    priceInput.value = "";
+    stockInput.value = "";
+
+
+    showMessage(
+        "Item added!"
+    );
+
+    loadItems();
+}
+
+
+// ========================================
+// READ / DISPLAY
+// ========================================
+
+async function loadItems() {
+
+    const list =
+        document.getElementById("list");
+
+    const search =
+        document
+        .getElementById("search")
+        .value
+        .trim();
+
+
+    let query = db
+        .from("orders")
+        .select("*")
+        .order("id", {
+            ascending: true
+        });
+
+
+    // ================================
+    // SEARCH
+    // ================================
+
+    if (search) {
+
+        query = query.ilike(
+            "name",
+            `%${search}%`
+        );
+    }
+
+
+    const {
+        data,
+        error
+    } = await query;
+
+
+    if (error) {
+
+        list.innerHTML =
+            `<p style="color:red;">
+                ${escapeHTML(error.message)}
+            </p>`;
+
+        return;
+    }
+
+
+    // ================================
+    // NO DATA
+    // ================================
+
+    if (
+        !data ||
+        data.length === 0
+    ) {
+
+        list.innerHTML =
+            "<p>No items found.</p>";
+
+        return;
+    }
+
+
+    // ================================
+    // DISPLAY ITEMS
+    // ================================
+
+    list.innerHTML =
+        data.map(item => {
+
+        return `
+            <div class="item">
+
+                <div class="item-id">
+                    ${escapeHTML(item.id)}
+                </div>
+
+                <div class="item-name">
+                    ${escapeHTML(item.name)}
+                </div>
+
+                <div class="item-info price">
+                    Price:
+                    ₱${Number(item.price).toFixed(2)}
+                </div>
+
+                <div class="item-info stock">
+                    Stock:
+                    ${Number(item.stock)}
+                </div>
+
+                <button
+                    class="edit"
+                    onclick="editItem('${escapeHTML(item.id)}')"
+                >
+                    Edit
+                </button>
+
+                <button
+                    class="delete"
+                    onclick="deleteItem('${escapeHTML(item.id)}')"
+                >
+                    Delete
+                </button>
+
+            </div>
+        `;
+
+    }).join("");
+}
+
+
+// ========================================
+// EDIT
+// ========================================
+
+async function editItem(id) {
+
+    const {
+        data,
+        error
+    } = await db
+        .from("orders")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+
+    if (error) {
+
+        showMessage(
+            "Cannot load item.",
+            false
+        );
+
+        return;
+    }
+
+
+    // Put data into inputs
+
+    document.getElementById("name").value =
+        data.name;
+
+    document.getElementById("price").value =
+        data.price;
+
+    document.getElementById("stock").value =
+        data.stock;
+
+
+    // Save ID for UPDATE
+
+    editId = id;
+
+
+    // Change button
+
+    document.getElementById("saveBtn")
+        .textContent =
+        "Update Item";
+
+
+    document.getElementById("cancelBtn")
+        .style.display =
+        "inline-block";
+
+
+    // Scroll to form
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+}
+
+
+// ========================================
+// CANCEL EDIT
+// ========================================
+
+function cancelEdit() {
+
+    editId = null;
+
+
+    document.getElementById("name")
+        .value = "";
+
+    document.getElementById("price")
+        .value = "";
+
+    document.getElementById("stock")
+        .value = "";
+
+
+    document.getElementById("saveBtn")
+        .textContent =
+        "Add Item";
+
+
+    document.getElementById("cancelBtn")
+        .style.display =
+        "none";
+}
+
+
+// ========================================
+// DELETE
+// ========================================
+
+async function deleteItem(id) {
+
+    const confirmDelete =
+        confirm(
+            "Delete " + id + "?"
+        );
+
+
+    if (!confirmDelete) {
+        return;
+    }
+
+
+    const { error } = await db
+        .from("orders")
+        .delete()
+        .eq("id", id);
+
+
+    if (error) {
+
+        showMessage(
+            "Delete failed: " +
+            error.message,
+            false
+        );
+
+        return;
+    }
+
+
+    showMessage(
+        "Item deleted!"
+    );
+
+
+    loadItems();
+}
+
+
+// ========================================
+// SECURITY / DISPLAY HELPER
+// ========================================
+
+function escapeHTML(value) {
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+// ========================================
+// LOAD WHEN PAGE OPENS
+// ========================================
+
+loadItems();
+
+</script>
+
+</body>
+</html>
