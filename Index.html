@@ -4,113 +4,277 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>ORME CRUD V2</title>
+<title>Supabase Profiles CRUD + Search</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f2f4f7;
-    padding: 20px;
+  font-family: Arial, sans-serif;
+  background: #f2f2f2;
+  margin: 0;
+  padding: 10px;
 }
 
 .container {
-    max-width: 600px;
-    margin: auto;
+  width: 100%;
+  max-width: 1100px;
+  margin: auto;
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
 }
 
-h1 {
-    text-align: center;
+h2 {
+  text-align: center;
+  margin-top: 5px;
+  margin-bottom: 15px;
 }
 
-.card {
-    background: white;
-    padding: 20px;
-    border-radius: 15px;
-    margin-bottom: 20px;
-    box-shadow: 0 3px 12px rgba(0,0,0,.08);
-}
+/* =========================
+   ADD FORM
+========================= */
 
-input {
-    width: 100%;
-    padding: 13px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 16px;
+.form-input {
+  width: 100%;
+  padding: 12px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
 }
 
 button {
-    border: none;
-    padding: 11px 15px;
-    border-radius: 8px;
-    cursor: pointer;
-    margin: 3px;
-    font-weight: bold;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
 }
 
-.add {
-    width: 100%;
-    background: #198754;
-    color: white;
+.add-btn {
+  background: green;
+  color: white;
+  width: 100%;
+  margin-top: 5px;
 }
 
-.edit {
-    background: #ffc107;
+/* =========================
+   SEARCH
+========================= */
+
+.search-area {
+  display: flex;
+  gap: 5px;
+  margin: 20px 0 10px;
+  width: 100%;
 }
 
-.delete {
-    background: #dc3545;
-    color: white;
+.search-area input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
 }
 
-.cancel {
-    background: #6c757d;
-    color: white;
+.search-btn {
+  background: #1976d2;
+  color: white;
+  white-space: nowrap;
 }
 
-.item {
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 15px;
-    margin-top: 10px;
+.all-btn {
+  background: #555;
+  color: white;
+  white-space: nowrap;
 }
 
-.item-id {
-    font-weight: bold;
-    color: #555;
-}
-
-.item-name {
-    font-size: 19px;
-    font-weight: bold;
-    margin: 7px 0;
-}
-
-.item-info {
-    margin: 5px 0;
-}
-
-.price {
-    color: #198754;
-    font-weight: bold;
-}
-
-.stock {
-    color: #555;
-}
+/* =========================
+   MESSAGE
+========================= */
 
 #message {
-    text-align: center;
-    margin: 10px 0;
-    font-weight: bold;
+  margin: 10px 0;
+  font-weight: bold;
 }
+
+/* =========================
+   TABLE
+========================= */
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  width: 100%;
+  min-width: 700px;
+  border-collapse: collapse;
+  margin-top: 10px;
+  table-layout: auto;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+th {
+  background: #222;
+  color: white;
+  white-space: nowrap;
+}
+
+/* ID */
+
+th:first-child,
+td:first-child {
+  width: 60px;
+  text-align: center;
+}
+
+/* NAME */
+
+th:nth-child(2),
+td:nth-child(2) {
+  min-width: 220px;
+}
+
+/* AGE */
+
+th:nth-child(3),
+td:nth-child(3) {
+  width: 80px;
+}
+
+/* ADDRESS */
+
+th:nth-child(4),
+td:nth-child(4) {
+  min-width: 220px;
+}
+
+/* ACTION */
+
+th:nth-child(5),
+td:nth-child(5) {
+  width: 150px;
+  text-align: center;
+}
+
+/* =========================
+   TABLE INPUT
+========================= */
+
+.table-input {
+  width: 100%;
+  min-width: 180px;
+  padding: 9px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+/* Disabled input */
+
+.table-input:disabled {
+  background: #f1f1f1;
+  color: #222;
+  border-color: transparent;
+  cursor: default;
+}
+
+/* Editable input */
+
+.table-input:not(:disabled) {
+  background: white;
+  border: 1px solid #1976d2;
+}
+
+/* Age */
+
+.age-input {
+  width: 70px;
+  min-width: 60px;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.edit-btn {
+  background: orange;
+  color: white;
+}
+
+.save-btn {
+  background: green;
+  color: white;
+}
+
+.cancel-btn {
+  background: #777;
+  color: white;
+  margin-left: 3px;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 600px) {
+
+  body {
+    padding: 5px;
+  }
+
+  .container {
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  .search-area {
+    flex-wrap: wrap;
+  }
+
+  .search-area input {
+    width: 100%;
+    flex: 100%;
+  }
+
+  .search-btn,
+  .all-btn {
+    flex: 1;
+  }
+
+  table {
+    min-width: 700px;
+  }
+
+  th,
+  td {
+    padding: 8px;
+  }
+
+}
+
 </style>
 </head>
 
@@ -118,551 +282,569 @@ button {
 
 <div class="container">
 
-    <h1>ORME Orders V2</h1>
-
-    <!-- =========================
-         ADD / EDIT FORM
-    ========================== -->
-
-    <div class="card">
-
-        <input
-            type="text"
-            id="name"
-            placeholder="Enter item name"
-        >
-
-        <input
-            type="number"
-            id="price"
-            placeholder="Enter price"
-            step="0.01"
-            min="0"
-        >
-
-        <input
-            type="number"
-            id="stock"
-            placeholder="Enter stock"
-            min="0"
-        >
-
-        <button
-            class="add"
-            id="saveBtn"
-            onclick="saveItem()"
-        >
-            Add Item
-        </button>
-
-        <button
-            class="cancel"
-            id="cancelBtn"
-            onclick="cancelEdit()"
-            style="display:none;"
-        >
-            Cancel Edit
-        </button>
-
-        <div id="message"></div>
-
-    </div>
+<h2>Profiles CRUD</h2>
 
 
-    <!-- =========================
-         SEARCH / LIST
-    ========================== -->
+<!-- =========================
+     ADD PROFILE
+========================= -->
 
-    <div class="card">
+<input
+  class="form-input"
+  type="text"
+  id="name"
+  placeholder="Name"
+>
 
-        <input
-            type="text"
-            id="search"
-            placeholder="Search item..."
-            oninput="loadItems()"
-        >
+<input
+  class="form-input"
+  type="number"
+  id="age"
+  placeholder="Age"
+>
 
-        <div id="list">
-            Loading...
-        </div>
+<input
+  class="form-input"
+  type="text"
+  id="address"
+  placeholder="Address"
+>
 
-    </div>
+<button
+  class="add-btn"
+  onclick="addProfile()"
+>
+  Add Profile
+</button>
+
+<div id="message"></div>
+
+
+<!-- =========================
+     SEARCH
+========================= -->
+
+<div class="search-area">
+
+  <input
+    type="text"
+    id="search"
+    placeholder="Search name..."
+    onkeyup="searchProfiles()"
+  >
+
+  <button
+    class="search-btn"
+    onclick="searchProfiles()"
+  >
+    Search
+  </button>
+
+  <button
+    class="all-btn"
+    onclick="loadProfiles()"
+  >
+    All
+  </button>
+
+</div>
+
+
+<!-- =========================
+     TABLE
+========================= -->
+
+<div class="table-container">
+
+<table>
+
+<thead>
+
+<tr>
+  <th>ID</th>
+  <th>Name</th>
+  <th>Age</th>
+  <th>Address</th>
+  <th>Action</th>
+</tr>
+
+</thead>
+
+<tbody id="tableBody">
+
+<tr>
+  <td colspan="5">
+    Loading...
+  </td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
 
 </div>
 
 
 <script>
 
-// ========================================
-// SUPABASE CONNECTION
-// ========================================
+// ===============================
+// SUPABASE
+// ===============================
 
 const SUPABASE_URL =
-    "https://adojdhrfrquueyxtzbiu.supabase.co";
+"https://adojdhrfrquueyxtzbiu.supabase.co";
 
 const SUPABASE_KEY =
-    "sb_publishable_DTVJI_ernJZP5BBDTKMY0A_rCbHAWzG";
+"sb_publishable_DTVJI_ernJZP5BBDTKMY0A_rCbHAWzG";
 
-const db = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
+const db = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
 );
 
 
-// ========================================
-// VARIABLES
-// ========================================
+// ===============================
+// ADD PROFILE
+// ===============================
 
-let editId = null;
+async function addProfile() {
+
+  const name =
+    document.getElementById("name")
+    .value
+    .trim();
+
+  const age =
+    document.getElementById("age")
+    .value;
+
+  const address =
+    document.getElementById("address")
+    .value
+    .trim();
+
+  const message =
+    document.getElementById("message");
 
 
-// ========================================
-// MESSAGE
-// ========================================
+  if (!name || !age || !address) {
 
-function showMessage(text, success = true) {
+    message.innerText =
+      "Punan lahat ng fields.";
 
-    const message =
-        document.getElementById("message");
+    return;
+  }
 
-    message.textContent = text;
 
-    message.style.color =
-        success ? "green" : "red";
+  message.innerText =
+    "Saving...";
 
-    setTimeout(() => {
-        message.textContent = "";
-    }, 2500);
+
+  const { error } =
+    await db
+      .from("profiles")
+      .insert({
+
+        name: name,
+
+        age: Number(age),
+
+        address: address
+
+      });
+
+
+  if (error) {
+
+    message.innerText =
+      "ERROR: " + error.message;
+
+    console.log(error);
+
+    return;
+  }
+
+
+  message.innerText =
+    "Profile added successfully!";
+
+
+  document.getElementById("name").value = "";
+
+  document.getElementById("age").value = "";
+
+  document.getElementById("address").value = "";
+
+
+  loadProfiles();
+
 }
 
 
-// ========================================
-// ADD / UPDATE
-// ========================================
+// ===============================
+// LOAD ALL PROFILES
+// ===============================
 
-async function saveItem() {
+async function loadProfiles() {
 
-    const nameInput =
-        document.getElementById("name");
-
-    const priceInput =
-        document.getElementById("price");
-
-    const stockInput =
-        document.getElementById("stock");
+  const tableBody =
+    document.getElementById("tableBody");
 
 
-    const name =
-        nameInput.value.trim();
-
-    const price =
-        Number(priceInput.value);
-
-    const stock =
-        Number(stockInput.value);
-
-
-    // ================================
-    // VALIDATION
-    // ================================
-
-    if (!name) {
-
-        showMessage(
-            "Enter item name.",
-            false
-        );
-
-        return;
-    }
+  tableBody.innerHTML = `
+    <tr>
+      <td colspan="5">
+        Loading...
+      </td>
+    </tr>
+  `;
 
 
-    if (
-        priceInput.value === "" ||
-        price < 0
-    ) {
-
-        showMessage(
-            "Enter a valid price.",
-            false
-        );
-
-        return;
-    }
+  const { data, error } =
+    await db
+      .from("profiles")
+      .select("id,name,age,address")
+      .order("id", {
+        ascending: true
+      });
 
 
-    if (
-        stockInput.value === "" ||
-        stock < 0
-    ) {
+  if (error) {
 
-        showMessage(
-            "Enter a valid stock.",
-            false
-        );
+    console.log(error);
 
-        return;
-    }
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="5">
+          ERROR: ${error.message}
+        </td>
+      </tr>
+    `;
 
-
-    // ================================
-    // UPDATE
-    // ================================
-
-    if (editId) {
-
-        const { error } = await db
-            .from("orders")
-            .update({
-                name: name,
-                price: price,
-                stock: stock
-            })
-            .eq("id", editId);
+    return;
+  }
 
 
-        if (error) {
+  displayProfiles(data);
 
-            showMessage(
-                "Update failed: " +
-                error.message,
-                false
-            );
-
-            return;
-        }
+}
 
 
-        showMessage(
-            "Item updated!"
-        );
+// ===============================
+// SEARCH
+// ===============================
 
-        cancelEdit();
+async function searchProfiles() {
 
-        loadItems();
-
-        return;
-    }
-
-
-    // ================================
-    // INSERT
-    // ================================
-
-    const { error } = await db
-        .from("orders")
-        .insert({
-            name: name,
-            price: price,
-            stock: stock
-        });
+  const search =
+    document
+      .getElementById("search")
+      .value
+      .trim();
 
 
-    if (error) {
+  if (!search) {
 
-        showMessage(
-            "Save failed: " +
-            error.message,
-            false
-        );
+    loadProfiles();
 
-        return;
-    }
+    return;
+  }
 
 
-    // Clear inputs
-
-    nameInput.value = "";
-    priceInput.value = "";
-    stockInput.value = "";
+  const tableBody =
+    document.getElementById("tableBody");
 
 
-    showMessage(
-        "Item added!"
+  tableBody.innerHTML = `
+    <tr>
+      <td colspan="5">
+        Searching...
+      </td>
+    </tr>
+  `;
+
+
+  const { data, error } =
+    await db
+      .from("profiles")
+      .select("id,name,age,address")
+      .ilike(
+        "name",
+        `%${search}%`
+      )
+      .order("id", {
+        ascending: true
+      });
+
+
+  if (error) {
+
+    console.log(error);
+
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="5">
+          ERROR: ${error.message}
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+
+  displayProfiles(data);
+
+}
+
+
+// ===============================
+// DISPLAY PROFILES
+// ===============================
+
+function displayProfiles(data) {
+
+  const tableBody =
+    document.getElementById("tableBody");
+
+
+  if (!data || data.length === 0) {
+
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="5">
+          No profiles found.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+
+  tableBody.innerHTML = "";
+
+
+  data.forEach(profile => {
+
+    const row =
+      document.createElement("tr");
+
+    row.id =
+      `row-${profile.id}`;
+
+
+    row.innerHTML = `
+
+      <td>
+        ${profile.id}
+      </td>
+
+      <td>
+
+        <input
+          class="table-input"
+          type="text"
+          id="name-${profile.id}"
+          value="${profile.name || ""}"
+          disabled
+        >
+
+      </td>
+
+      <td>
+
+        <input
+          class="table-input age-input"
+          type="number"
+          id="age-${profile.id}"
+          value="${profile.age || ""}"
+          disabled
+        >
+
+      </td>
+
+      <td>
+
+        <input
+          class="table-input"
+          type="text"
+          id="address-${profile.id}"
+          value="${profile.address || ""}"
+          disabled
+        >
+
+      </td>
+
+      <td id="action-${profile.id}">
+
+        <button
+          class="edit-btn"
+          onclick="editProfile(${profile.id})"
+        >
+          Edit
+        </button>
+
+      </td>
+
+    `;
+
+
+    tableBody.appendChild(row);
+
+  });
+
+}
+
+
+// ===============================
+// EDIT PROFILE
+// ===============================
+
+function editProfile(id) {
+
+  document
+    .getElementById(`name-${id}`)
+    .disabled = false;
+
+
+  document
+    .getElementById(`age-${id}`)
+    .disabled = false;
+
+
+  document
+    .getElementById(`address-${id}`)
+    .disabled = false;
+
+
+  const action =
+    document.getElementById(
+      `action-${id}`
     );
 
-    loadItems();
+
+  action.innerHTML = `
+
+    <button
+      class="save-btn"
+      onclick="updateProfile(${id})"
+    >
+      Save
+    </button>
+
+    <button
+      class="cancel-btn"
+      onclick="cancelEdit()"
+    >
+      Cancel
+    </button>
+
+  `;
+
+
+  document
+    .getElementById(`name-${id}`)
+    .focus();
+
 }
 
 
-// ========================================
-// READ / DISPLAY
-// ========================================
-
-async function loadItems() {
-
-    const list =
-        document.getElementById("list");
-
-    const search =
-        document
-        .getElementById("search")
-        .value
-        .trim();
-
-
-    let query = db
-        .from("orders")
-        .select("*")
-        .order("id", {
-            ascending: true
-        });
-
-
-    // ================================
-    // SEARCH
-    // ================================
-
-    if (search) {
-
-        query = query.ilike(
-            "name",
-            `%${search}%`
-        );
-    }
-
-
-    const {
-        data,
-        error
-    } = await query;
-
-
-    if (error) {
-
-        list.innerHTML =
-            `<p style="color:red;">
-                ${escapeHTML(error.message)}
-            </p>`;
-
-        return;
-    }
-
-
-    // ================================
-    // NO DATA
-    // ================================
-
-    if (
-        !data ||
-        data.length === 0
-    ) {
-
-        list.innerHTML =
-            "<p>No items found.</p>";
-
-        return;
-    }
-
-
-    // ================================
-    // DISPLAY ITEMS
-    // ================================
-
-    list.innerHTML =
-        data.map(item => {
-
-        return `
-            <div class="item">
-
-                <div class="item-id">
-                    ${escapeHTML(item.id)}
-                </div>
-
-                <div class="item-name">
-                    ${escapeHTML(item.name)}
-                </div>
-
-                <div class="item-info price">
-                    Price:
-                    ₱${Number(item.price).toFixed(2)}
-                </div>
-
-                <div class="item-info stock">
-                    Stock:
-                    ${Number(item.stock)}
-                </div>
-
-                <button
-                    class="edit"
-                    onclick="editItem('${escapeHTML(item.id)}')"
-                >
-                    Edit
-                </button>
-
-                <button
-                    class="delete"
-                    onclick="deleteItem('${escapeHTML(item.id)}')"
-                >
-                    Delete
-                </button>
-
-            </div>
-        `;
-
-    }).join("");
-}
-
-
-// ========================================
-// EDIT
-// ========================================
-
-async function editItem(id) {
-
-    const {
-        data,
-        error
-    } = await db
-        .from("orders")
-        .select("*")
-        .eq("id", id)
-        .single();
-
-
-    if (error) {
-
-        showMessage(
-            "Cannot load item.",
-            false
-        );
-
-        return;
-    }
-
-
-    // Put data into inputs
-
-    document.getElementById("name").value =
-        data.name;
-
-    document.getElementById("price").value =
-        data.price;
-
-    document.getElementById("stock").value =
-        data.stock;
-
-
-    // Save ID for UPDATE
-
-    editId = id;
-
-
-    // Change button
-
-    document.getElementById("saveBtn")
-        .textContent =
-        "Update Item";
-
-
-    document.getElementById("cancelBtn")
-        .style.display =
-        "inline-block";
-
-
-    // Scroll to form
-
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
-}
-
-
-// ========================================
+// ===============================
 // CANCEL EDIT
-// ========================================
+// ===============================
 
 function cancelEdit() {
 
-    editId = null;
+  searchProfiles();
 
-
-    document.getElementById("name")
-        .value = "";
-
-    document.getElementById("price")
-        .value = "";
-
-    document.getElementById("stock")
-        .value = "";
-
-
-    document.getElementById("saveBtn")
-        .textContent =
-        "Add Item";
-
-
-    document.getElementById("cancelBtn")
-        .style.display =
-        "none";
 }
 
 
-// ========================================
-// DELETE
-// ========================================
+// ===============================
+// UPDATE PROFILE
+// ===============================
 
-async function deleteItem(id) {
+async function updateProfile(id) {
 
-    const confirmDelete =
-        confirm(
-            "Delete " + id + "?"
-        );
-
-
-    if (!confirmDelete) {
-        return;
-    }
+  const name =
+    document
+      .getElementById(`name-${id}`)
+      .value
+      .trim();
 
 
-    const { error } = await db
-        .from("orders")
-        .delete()
-        .eq("id", id);
+  const age =
+    document
+      .getElementById(`age-${id}`)
+      .value;
 
 
-    if (error) {
-
-        showMessage(
-            "Delete failed: " +
-            error.message,
-            false
-        );
-
-        return;
-    }
+  const address =
+    document
+      .getElementById(`address-${id}`)
+      .value
+      .trim();
 
 
-    showMessage(
-        "Item deleted!"
+  if (!name || !age || !address) {
+
+    alert(
+      "Punan lahat ng fields."
     );
 
+    return;
+  }
 
-    loadItems();
+
+  const { error } =
+    await db
+      .from("profiles")
+      .update({
+
+        name: name,
+
+        age: Number(age),
+
+        address: address
+
+      })
+      .eq(
+        "id",
+        Number(id)
+      );
+
+
+  if (error) {
+
+    alert(
+      "Update error: " +
+      error.message
+    );
+
+    console.log(error);
+
+    return;
+  }
+
+
+  alert(
+    "Updated successfully!"
+  );
+
+
+  searchProfiles();
+
 }
 
 
-// ========================================
-// SECURITY / DISPLAY HELPER
-// ========================================
+// ===============================
+// LOAD ON START
+// ===============================
 
-function escapeHTML(value) {
-
-    return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-
-// ========================================
-// LOAD WHEN PAGE OPENS
-// ========================================
-
-loadItems();
+loadProfiles();
 
 </script>
 
